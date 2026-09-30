@@ -1,0 +1,36 @@
+server:
+  port: 18080
+  address: 127.0.0.1
+
+spring:
+  application:
+    name: quotagate
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3308/quotagate
+    username: quotagate
+    password: quotagate_dev
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6380
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+quotagate:
+  resilience:
+    timeout-ms: ${PROVIDER_TIMEOUT_MS:30000}
+  usage:
+    consumer-enabled: ${USAGE_CONSUMER_ENABLED:true}
+    consumer-delay-ms: ${USAGE_CONSUMER_DELAY_MS:20}
+  providers:
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
+      default-model: ${OPENAI_DEFAULT_MODEL:gpt-4o-mini}

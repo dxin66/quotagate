@@ -1,0 +1,48 @@
+name: Project checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: quotagate
+          MYSQL_USER: quotagate
+          MYSQL_PASSWORD: quotagate_dev
+          MYSQL_ROOT_PASSWORD: root_dev
+        ports:
+          - 3308:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uquotagate -pquotagate_dev"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6380:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Run tests
+        run: ./mvnw --batch-mode clean test
